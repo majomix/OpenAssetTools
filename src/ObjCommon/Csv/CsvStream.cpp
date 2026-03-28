@@ -113,9 +113,36 @@ bool CsvInputStream::EmitNextRow(const std::function<void(std::string)>& cb) con
     const auto isEof = c == EOF;
     std::ostringstream col;
     auto content = false;
+    auto inQuotes = false;
     while (c != EOF)
     {
-        if (c == CSV_SEPARATOR)
+        if (inQuotes)
+        {
+            if (c == '"')
+            {
+                auto next = m_stream.get();
+                if (next == '"')
+                {
+                    col << '"';
+                }
+                else
+                {
+                    inQuotes = false;
+                    if (next != EOF)
+                        m_stream.putback(static_cast<char>(next));
+                }
+            }
+            else
+            {
+                col << static_cast<char>(c);
+            }
+        }
+        else if (c == '"' && !content)
+        {
+            inQuotes = true;
+            content = true;
+        }
+        else if (c == CSV_SEPARATOR)
         {
             auto value = col.str();
             utils::StringTrimR(value);

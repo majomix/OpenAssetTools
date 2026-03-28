@@ -66,9 +66,9 @@ namespace
 
         AssetCreationResult CreateAsset(const std::string& assetName, AssetCreationContext& context) override
         {
-            // Do not load any GfxImages from raw for now that are not loaded
-            // TODO: Load iwis and add streaming info to asset
-            if (assetName.empty() || assetName[0] != '*')
+            // Allow embedding any image from DDS, not just '*'-prefixed inline textures.
+            // Non-'*' images (e.g. font atlases) are also embedded inline in retail zones.
+            if (assetName.empty())
                 return AssetCreationResult::NoAction();
 
             const auto file = m_search_path.Open(image::GetFileNameForAsset(assetName, ".dds"));
