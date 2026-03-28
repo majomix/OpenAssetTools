@@ -148,6 +148,7 @@ include "src/ObjCompiling.lua"
 include "src/ObjImage.lua"
 include "src/ObjLoading.lua"
 include "src/ObjWriting.lua"
+include "src/Cooker.lua"
 include "tools/scripts/raw.lua"
 
 -- Components group: All projects assist or are part of a tool
@@ -181,6 +182,7 @@ group "Tools"
     LinkerCli:project()
     UnlinkerCli:project()
     ImageConverter:project()
+    Cooker:project()
 
     if _OPTIONS["modman"] then
         ModMan:project()
