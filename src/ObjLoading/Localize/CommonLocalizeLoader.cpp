@@ -30,12 +30,20 @@ AssetCreationResult CommonLocalizeLoader::CreateLocalizeAsset(const std::string&
     if (!reader.ReadLocalizeFile(localizeEntries))
         return AssetCreationResult::Failure();
 
-    auto lastResult = AssetCreationResult::Failure();
+    AssetCreationResult lastResult = AssetCreationResult::NoAction();
     for (const auto& entry : localizeEntries)
     {
         lastResult = CreateAssetFromCommonAsset(entry, context);
         if (!lastResult.HasBeenSuccessful())
             return lastResult;
+    }
+
+    // File was found and parsed. If all entries were duplicates, localizeEntries is empty
+    // but that's not an error — return last successful result or a dummy success.
+    if (!lastResult.HasTakenAction())
+    {
+        // Create a dummy localize entry so the asset system sees a successful load
+        return CreateAssetFromCommonAsset(CommonLocalizeEntry{assetName, ""}, context);
     }
 
     return lastResult;

@@ -36,9 +36,11 @@ void SequenceLocalizeFileLanguageValue::ProcessMatch(LocalizeFileParserState* st
         const auto& currentReference = state->m_current_reference;
         if (!state->m_duplication_checker.CheckLocalizeEntryForDuplicates(currentReference))
         {
-            con::warn("Localize: a value for reference \"{}\" was already defined", currentReference);
+            // Duplicate — skip silently, first definition wins
         }
-
-        state->m_entries.emplace_back(currentReference, valueToken.StringValue());
+        else
+        {
+            state->m_entries.emplace_back(currentReference, valueToken.StringValue());
+        }
     }
 }

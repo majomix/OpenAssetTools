@@ -1,5 +1,11 @@
 #include "SimpleLexer.h"
 
+// Safe ctype wrappers for UTF-8 bytes (values > 127 cause assert in debug CRT)
+#define SAFE_ISSPACE(c) (isspace(static_cast<unsigned char>(c)))
+#define SAFE_ISDIGIT(c) (isdigit(static_cast<unsigned char>(c)))
+#define SAFE_ISALPHA(c) (isalpha(static_cast<unsigned char>(c)))
+#define SAFE_ISALNUM(c) (isalnum(static_cast<unsigned char>(c)))
+
 SimpleLexer::Config::MultiCharacterToken::MultiCharacterToken(const int id, std::string value)
     : m_id(id),
       m_value(std::move(value))
@@ -93,7 +99,7 @@ SimpleParserValue SimpleLexer::GetNextToken()
         return SimpleParserValue::NewLine(GetPreviousCharacterPos());
     }
 
-    while (isspace(c))
+    while (SAFE_ISSPACE(c))
     {
         if (m_config.m_emit_new_line_tokens && c == '\n')
             return SimpleParserValue::NewLine(GetPreviousCharacterPos());
@@ -130,7 +136,7 @@ SimpleParserValue SimpleLexer::GetNextToken()
         return SimpleParserValue::String(pos, new std::string(m_config.m_string_escape_sequences ? ReadStringWithEscapeSequences() : ReadString()));
 
     if (m_config.m_read_integer_numbers
-        && (isdigit(c) || (c == '+' || c == '-' || (m_config.m_read_floating_point_numbers && c == '.')) && isdigit(PeekChar())))
+        && (SAFE_ISDIGIT(c) || (c == '+' || c == '-' || (m_config.m_read_floating_point_numbers && c == '.')) && isdigit(PeekChar())))
     {
         bool hasSignPrefix;
         int integerValue;
@@ -152,7 +158,7 @@ SimpleParserValue SimpleLexer::GetNextToken()
         return SimpleParserValue::Integer(pos, integerValue, hasSignPrefix);
     }
 
-    if (isalpha(c) || c == '_')
+    if (SAFE_ISALPHA(c) || c == '_')
     {
         auto identifier = ReadIdentifier();
 
